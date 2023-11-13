@@ -2,6 +2,7 @@ Food myFood;
 int sizeX;
 int sizeY;
 ArrayList<Circle> circles;
+ArrayList<Mine> mines;
 
 void setup() {
   size(1500, 1000);
@@ -21,6 +22,13 @@ void setup() {
     circles.add(new Circle(random(width), random(height), random(5, 20)));
   }
   circles.add(new UserCircle(width/2, height/2, 10));
+
+  mines = new ArrayList<Mine>();
+  for (int i = 0; i < 5; i++) {
+    float mineX = random(width);
+    float mineY = random(height);
+    mines.add(new Mine(mineX, mineY, 15)); // Initialize mines
+  }
 }
 
 void draw() {
@@ -41,6 +49,21 @@ void draw() {
  }
  
  checkForEngulfing();
+
+for (Mine mine : mines) {
+    mine.display();
+    for (Circle circle : circles) {
+      if (circle instanceof UserCircle && mine.checkCollision(circle)) {
+        mine.explode();
+        circle.r *= 0.8;
+      }
+    }
+
+    for (Circle fragment : mine.explodedCircles) {
+      fragment.move();
+      fragment.display();
+    }
+  }
 }
 
 void reDrawFood(){
