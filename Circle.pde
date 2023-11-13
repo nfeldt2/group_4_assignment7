@@ -13,7 +13,7 @@ class Circle {
     this.r = r;
     this.inceptionTime = millis();
     this.circleSize = PI * pow(r, 2);
-    this.baseSpeed = 6 * pow(.99, circleSize/50); 
+    this.baseSpeed = 2 * pow(.99, circleSize/50); 
     float angle = random(TWO_PI);
     this.vx = this.baseSpeed * cos(angle);
     this.vy = this.baseSpeed * sin(angle);
