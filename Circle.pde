@@ -1,85 +1,169 @@
-class Circle {
-  float x, y;      
-  float r;         
-  float vx, vy;    
-  float baseSpeed; 
-  float circleSize;
-  float inceptionTime;
-  boolean canSplit;
+Food myFood;
+int sizeX;
+int sizeY;
+ArrayList<Circle> circles;
+ArrayList<Mine> mines;
+float gameTimer;
+float gameStart;
 
-  Circle(float x, float y, float r) {
-    this.x = x;
-    this.y = y;
-    this.r = r;
-    this.inceptionTime = millis();
-    this.circleSize = PI * pow(r, 2);
-    this.baseSpeed = 2 * pow(.99, circleSize/50); 
-    float angle = random(TWO_PI);
-    this.vx = this.baseSpeed * cos(angle);
-    this.vy = this.baseSpeed * sin(angle);
-    this.canSplit = false;
-  }
+boolean inMenu = true;
+int userCircleColor = color(0, 0, 255);
 
-  void move() {
-    float speedCurrent = lerp(this.baseSpeed, 6 * pow(.99, circleSize/50), 0.01);
-    float ratio = this.baseSpeed/speedCurrent;
-    x += vx * ratio;
-    y += vy * ratio;
-
-    
-    if (x - r <= 0 || x + r >= width) {
-      vx = -vx;
-      // addresses scenarios when food is picked up by border causing it to permenently oscillate
-      if (x - r <= 0){
-        x = r;
-      } else {
-        x = width - r;
+void setup() {
+  size(1500, 1000);
+  gameStart = millis();
+  myFood = new Food(width/5, height/5, 350);
+  sizeX = width/5;
+  sizeY = height/5;
+  for (int i = 0; i < sizeX; i++) {
+    for (int j = 0; j < sizeY; j++) {
+      if (myFood.food.get(i).get(j)) {
+        fill(0, 255, 0);
+        rect(i * (width / sizeX), j * (height / sizeY), width / sizeX, height / sizeY);
       }
     }
-    if (y - r <= 0 || y + r >= height) {
-      vy = -vy;
-      if (y - r <= 0) {
-        y = r;
+  }
+  circles = new ArrayList<Circle>();
+  for (int i = 0; i < 30; i++) { 
+    circles.add(new Circle(random(width), random(height), random(5, 20)));
+  }
+  circles.add(new UserCircle(width/2, height/2, 10, userCircleColor));
+
+  mines = new ArrayList<Mine>();
+  for (int i = 0; i < 5; i++) {
+    float mineX = random(width);
+    float mineY = random(height);
+    mines.add(new Mine(mineX, mineY, 15));
+  }
+}
+
+void draw() {
+  if (inMenu) {
+    drawMenu();
+  } else {
+    background(255);
+    reDrawFood();
+    for (int i = 0; i < circles.size(); i++) {
+      Circle c;
+      c = circles.get(i);
+      c.growOnTouchingFood(myFood);
+      if (c instanceof UserCircle) {
+        UserCircle temp = (UserCircle) c;
+        temp.move();
+        temp.display();
+        gameTimer = (millis() - gameStart)/100;
+        fill(0);
+        textSize(64);
+        text("Current Radius: " + round(temp.r), 30, 50);
+        text("Time Alive: " + gameTimer, 950, 50);
       } else {
-        y = height -r;
+        c.move();
+        c.display();
       }
     }
-    
-  }
-
-  void growOnTouchingFood(Food food) {
-    for (int i = 0; i < sizeX; i++) {
-      for (int j = 0; j < sizeY; j++) {
-        // circle must engulf the center of the food
-        if (food.food.get(i).get(j) && dist(x, y, i * (width / sizeX) + 2.5 , j * (height / sizeY) + 2.5) <= r) {
-          r = sqrt((circleSize + 50)/PI);
-          circleSize = PI * r * r;
-          food.food.get(i).set(j, false);
-          food.implemented -= 1; 
-
-          
-          baseSpeed *= 0.99;
-          float speedCurrent = sqrt(vx*vx + vy*vy);
-          float ratio = baseSpeed / speedCurrent;
-          vx *= ratio;
-          vy *= ratio;
+   
+    checkForEngulfing();
+  
+    for (Mine mine : mines) {
+      mine.display();
+      for (Circle circle : circles) {
+        if (circle instanceof UserCircle && mine.checkCollision(circle)) {
+          mine.explode();
+          circle.r *= 0.8;
         }
       }
+  
+      for (Circle fragment : mine.explodedCircles) {
+        fragment.move();
+        fragment.display();
+      }
     }
   }
-  
-  void engulf(float otherSize) {
-    r = sqrt((circleSize + otherSize)/PI);
-    circleSize = PI * r * r;
-    baseSpeed *= pow(.99, 50/otherSize); // adjust speed based on size engulfed
-    float speedCurrent = sqrt(vx*vx + vy*vy);
-    float ratio = baseSpeed / speedCurrent;
-    vx *= ratio;
-    vy *= ratio;
+}
+
+void drawMenu() {
+  background(200);
+  textSize(32);
+  fill(0);
+  text("Click to Change User Circle Color", width / 2 - 150, height / 2 - 50);
+
+  int[] colors = {color(255, 255, 0), color(0, 255, 0), color(0, 0, 255)};
+  for (int i = 0; i < colors.length; i++) {
+    fill(colors[i]);
+    ellipse(100 + 100 * i, height / 2, 50, 50);
   }
+}
+
+void mousePressed() {
+  if (inMenu) {
+    for (int i = 0; i < 3; i++) {
+      if (dist(mouseX, mouseY, 100 + 100 * i, height / 2) < 25) {
+        if (i == 0) userCircleColor = color(255, 255, 0);
+        if (i == 1) userCircleColor = color(0, 255, 0);
+        if (i == 2) userCircleColor = color(0, 0, 255);
+
+        inMenu = false;
+        setup();
+      }
+    }
+  }
+}
+
+void reDrawFood(){
+  myFood.update();
+  for (int i = 0; i < sizeX; i++) {
+    for (int j = 0; j < sizeY; j++) {
+      if (myFood.food.get(i).get(j)) {
+        fill(0, 255, 0);
+        rect(i * (width / sizeX), j * (height / sizeY), width / sizeX, height / sizeY);
+      }
+    }
+  }
+}
+
+void checkForEngulfing() {
+  int[] toRemove={};
+  int iterations = circles.size();
+  boolean userCircle = true;
+  for (int i = iterations - 1; i >= 0; i--) {
     
-  void display() {
-    fill(150);
-    ellipse(x, y, 2*r, 2*r);
+    Circle c1;
+    if (circles.get(i) instanceof UserCircle) {
+      c1 = (UserCircle) circles.get(i);
+      
+      if (userCircle) {
+        if (keyPressed && key == 's') {
+          boolean allowSplit = ((UserCircle) c1).timer();
+          if (allowSplit) {
+            float[] params = ((UserCircle) c1).split();
+            UserCircle temp = new UserCircle(params[0], params[1], params[2], userCircleColor);
+            temp.vx = params[3];
+            temp.vy = params[4];
+            temp.canSplit = false;
+            circles.add(temp);
+        }
+      }
+      }
+      userCircle = false;
+      
+    } else {
+      c1 = circles.get(i);
+    }
+    
+    for (int j = iterations - 1; j >= 0; j--) {
+      if (i == j) continue;
+      
+      Circle c2 = circles.get(j);
+
+      float d = dist(c1.x, c1.y, c2.x, c2.y);
+      
+      if (c1.r > 1.1 * c2.r && d < 0.9 * c1.r) {
+        toRemove = append(toRemove, j);
+        c1.engulf(c2.circleSize);
+      }
+    }
+  }
+  for (int index : toRemove) {
+    circles.remove(index);
   }
 }
