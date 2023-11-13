@@ -30,7 +30,7 @@ void setup() {
   for (int i = 0; i < 5; i++) {
     float mineX = random(width);
     float mineY = random(height);
-    mines.add(new Mine(mineX, mineY, 15)); // Initialize mines
+    mines.add(new Mine(mineX, mineY, 15));
   }
 }
 
