@@ -52,7 +52,6 @@ class UserCircle extends Circle{
       x += vx;
       y += vy;
     
-    // Abraham functionality
   }
   
    float[] split() {
@@ -78,5 +77,11 @@ class UserCircle extends Circle{
     return new float[]{x + (temp_vx * 4), y + (temp_vy * 4), newRadius, temp_vx, temp_vy};
      
   }
+
+  void display(){
+    fill(0, 0, 255);
+    ellipse(x, y, 2*r, 2*r);
+  }
+
 }
   
