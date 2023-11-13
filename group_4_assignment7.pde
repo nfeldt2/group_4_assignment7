@@ -32,25 +32,25 @@ void setup() {
 }
 
 void draw() {
- background(255);
- reDrawFood();
- for (int i = 0; i < circles.size(); i++) {
-   Circle c;
-   c = circles.get(i);
-   c.growOnTouchingFood(myFood);
-   if (c instanceof UserCircle) {
-     UserCircle temp = (UserCircle) c;
-     temp.move();
-     temp.display();
-   } else {
-     c.move();
-     c.display();
-   }
- }
+  background(255);
+  reDrawFood();
+  for (int i = 0; i < circles.size(); i++) {
+    Circle c;
+    c = circles.get(i);
+    c.growOnTouchingFood(myFood);
+    if (c instanceof UserCircle) {
+      UserCircle temp = (UserCircle) c;
+      temp.move();
+      temp.display();
+    } else {
+      c.move();
+      c.display();
+    }
+  }
  
- checkForEngulfing();
+  checkForEngulfing();
 
-for (Mine mine : mines) {
+  for (Mine mine : mines) {
     mine.display();
     for (Circle circle : circles) {
       if (circle instanceof UserCircle && mine.checkCollision(circle)) {
