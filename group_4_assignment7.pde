@@ -4,8 +4,8 @@ int sizeY;
 ArrayList<Circle> circles;
 
 void setup() {
-  size(1000, 1000);
-  myFood = new Food(width/5, height/5, 80);
+  size(1500, 1000);
+  myFood = new Food(width/5, height/5, 350);
   sizeX = width/5;
   sizeY = height/5;
   for (int i = 0; i < sizeX; i++) {
@@ -17,10 +17,10 @@ void setup() {
     }
   }
   circles = new ArrayList<Circle>();
-  for (int i = 0; i < 10; i++) { 
-    circles.add(new Circle(random(width), random(height), random(5, 15)));
+  for (int i = 0; i < 30; i++) { 
+    circles.add(new Circle(random(width), random(height), random(5, 20)));
   }
-  circles.add(new UserCircle(random(width), random(height), 40));
+  circles.add(new UserCircle(width/2, height/2, 10));
 }
 
 void draw() {
