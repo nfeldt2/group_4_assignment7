@@ -11,7 +11,7 @@ void setup() {
   for (int i = 0; i < sizeX; i++) {
     for (int j = 0; j < sizeY; j++) {
       if (myFood.food.get(i).get(j)) {
-        fill(0);
+        fill(0, 255, 0);
         rect(i * (width / sizeX), j * (height / sizeY), width / sizeX, height / sizeY);
       }
     }
@@ -48,7 +48,7 @@ void reDrawFood(){
   for (int i = 0; i < sizeX; i++) {
     for (int j = 0; j < sizeY; j++) {
       if (myFood.food.get(i).get(j)) {
-        fill(0);
+        fill(0, 255, 0);
         rect(i * (width / sizeX), j * (height / sizeY), width / sizeX, height / sizeY);
       }
     }
