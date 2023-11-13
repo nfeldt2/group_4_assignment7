@@ -3,9 +3,12 @@ int sizeX;
 int sizeY;
 ArrayList<Circle> circles;
 ArrayList<Mine> mines;
+float gameTimer;
+float gameStart;
 
 void setup() {
   size(1500, 1000);
+  gameStart = millis();
   myFood = new Food(width/5, height/5, 350);
   sizeX = width/5;
   sizeY = height/5;
@@ -42,6 +45,11 @@ void draw() {
       UserCircle temp = (UserCircle) c;
       temp.move();
       temp.display();
+      gameTimer = (millis() - gameStart)/100;
+      fill(0);
+      textSize(64);
+      text("Current Radius: " + round(temp.r), 30, 50);
+      text("Time Alive: " + gameTimer, 950, 50);
     } else {
       c.move();
       c.display();
