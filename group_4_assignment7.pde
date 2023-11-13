@@ -6,6 +6,9 @@ ArrayList<Mine> mines;
 float gameTimer;
 float gameStart;
 
+boolean inMenu = true;
+int userCircleColor = color(0, 0, 255);
+
 void setup() {
   size(1500, 1000);
   gameStart = millis();
@@ -24,7 +27,7 @@ void setup() {
   for (int i = 0; i < 30; i++) { 
     circles.add(new Circle(random(width), random(height), random(5, 20)));
   }
-  circles.add(new UserCircle(width/2, height/2, 10));
+  circles.add(new UserCircle(width/2, height/2, 10, userCircleColor));
 
   mines = new ArrayList<Mine>();
   for (int i = 0; i < 5; i++) {
@@ -35,41 +38,73 @@ void setup() {
 }
 
 void draw() {
-  background(255);
-  reDrawFood();
-  for (int i = 0; i < circles.size(); i++) {
-    Circle c;
-    c = circles.get(i);
-    c.growOnTouchingFood(myFood);
-    if (c instanceof UserCircle) {
-      UserCircle temp = (UserCircle) c;
-      temp.move();
-      temp.display();
-      gameTimer = (millis() - gameStart)/100;
-      fill(0);
-      textSize(64);
-      text("Current Radius: " + round(temp.r), 30, 50);
-      text("Time Alive: " + gameTimer, 950, 50);
-    } else {
-      c.move();
-      c.display();
-    }
-  }
- 
-  checkForEngulfing();
-
-  for (Mine mine : mines) {
-    mine.display();
-    for (Circle circle : circles) {
-      if (circle instanceof UserCircle && mine.checkCollision(circle)) {
-        mine.explode();
-        circle.r *= 0.8;
+  if (inMenu) {
+    drawMenu();
+  } else {
+    background(255);
+    reDrawFood();
+    for (int i = 0; i < circles.size(); i++) {
+      Circle c;
+      c = circles.get(i);
+      c.growOnTouchingFood(myFood);
+      if (c instanceof UserCircle) {
+        UserCircle temp = (UserCircle) c;
+        temp.move();
+        temp.display();
+        gameTimer = (millis() - gameStart)/100;
+        fill(0);
+        textSize(64);
+        text("Current Radius: " + round(temp.r), 30, 50);
+        text("Time Alive: " + gameTimer, 950, 50);
+      } else {
+        c.move();
+        c.display();
       }
     }
+   
+    checkForEngulfing();
+  
+    for (Mine mine : mines) {
+      mine.display();
+      for (Circle circle : circles) {
+        if (circle instanceof UserCircle && mine.checkCollision(circle)) {
+          mine.explode();
+          circle.r *= 0.8;
+        }
+      }
+  
+      for (Circle fragment : mine.explodedCircles) {
+        fragment.move();
+        fragment.display();
+      }
+    }
+  }
+}
 
-    for (Circle fragment : mine.explodedCircles) {
-      fragment.move();
-      fragment.display();
+void drawMenu() {
+  background(200);
+  textSize(32);
+  fill(0);
+  text("Click to Change User Circle Color", width / 2 - 150, height / 2 - 50);
+
+  int[] colors = {color(255, 255, 0), color(0, 255, 0), color(0, 0, 255)};
+  for (int i = 0; i < colors.length; i++) {
+    fill(colors[i]);
+    ellipse(100 + 100 * i, height / 2, 50, 50);
+  }
+}
+
+void mousePressed() {
+  if (inMenu) {
+    for (int i = 0; i < 3; i++) {
+      if (dist(mouseX, mouseY, 100 + 100 * i, height / 2) < 25) {
+        if (i == 0) userCircleColor = color(255, 255, 0);
+        if (i == 1) userCircleColor = color(0, 255, 0);
+        if (i == 2) userCircleColor = color(0, 0, 255);
+
+        inMenu = false;
+        setup();
+      }
     }
   }
 }
@@ -101,7 +136,7 @@ void checkForEngulfing() {
           boolean allowSplit = ((UserCircle) c1).timer();
           if (allowSplit) {
             float[] params = ((UserCircle) c1).split();
-            UserCircle temp = new UserCircle(params[0], params[1], params[2]);
+            UserCircle temp = new UserCircle(params[0], params[1], params[2], userCircleColor);
             temp.vx = params[3];
             temp.vy = params[4];
             temp.canSplit = false;
