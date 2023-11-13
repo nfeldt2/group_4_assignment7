@@ -1,7 +1,10 @@
 class UserCircle extends Circle{
+  
+    int myColor;
     
-    UserCircle(float x, float y, float r) {
+    UserCircle(float x, float y, float r, int myColor) {
       super(x, y, r);
+      this.myColor = myColor;
     }
     boolean timer() {
       if (inceptionTime + 2000 > millis() && !canSplit) {
@@ -79,9 +82,8 @@ class UserCircle extends Circle{
   }
 
   void display(){
-    fill(0, 0, 255);
+    fill(myColor);
     ellipse(x, y, 2*r, 2*r);
   }
 
 }
-  
